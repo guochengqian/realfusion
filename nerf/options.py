@@ -1,6 +1,6 @@
 import datetime
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal, Optional, List, Tuple
 
 from tap import Tap
 
@@ -10,7 +10,7 @@ from tap import Tap
 # [start_value, end_value] which is annealed linearly over all training iterations, or a 
 # list of [start_value, end_value, end_iters, fn_name] which reaches its end_value at 
 # end_iters and may use either linear or log annealing.
-AnnealedValue = list[float]
+AnnealedValue = List[float]
 
 
 class Options(Tap):
@@ -46,9 +46,9 @@ class Options(Tap):
     bound: float = 0.75  # assume the scene is bounded in box(-bound, bound)")  # NOTE: Previous bound was 1, but I think 0.75 is better
     dt_gamma: float = 0  # dt_gamma (>=0) for adaptive ray marching. set to 0 to disable, >0 to accelerate rendering (but usually with worse quality)
     min_near: float = 0.1  # minimum near distance for camera
-    radius_range: tuple[float, float] = [1.0, 1.5]  # training camera radius range
+    radius_range: Tuple[float, float] = [1.0, 1.5]  # training camera radius range
     radius_rot: Optional[float] = 1.8  # None  # circle radius for vis
-    fovy_range: tuple[float, float] = [40, 70]  # training camera fovy range
+    fovy_range: Tuple[float, float] = [40, 70]  # training camera fovy range
     dir_text: bool = True  # direction-encode the text prompt, by appending front/side/back/overhead view
     suppress_face: Optional[str] = None  # text for negative prompt for back view of image
     angle_overhead: float = 30  # [0, angle_overhead] is the overhead region

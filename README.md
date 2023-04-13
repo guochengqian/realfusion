@@ -11,22 +11,24 @@
 
 ## Table of Contents
 
+- [RealFusion: 360° Reconstruction of Any Object from a Single Image](#realfusion-360-reconstruction-of-any-object-from-a-single-image)
+  - [CVPR 2023](#cvpr-2023)
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
-  * [Code Overview](#code-overview)
-  * [Abstract](#abstract)
-  * [Examples](#examples)
-  * [Method](#method)
-  * [A Quick Note](#a-quick-note)
+  - [Code Overview](#code-overview)
+  - [Abstract](#abstract)
+  - [Examples](#examples)
+  - [Method](#method)
+  - [A Quick Note](#a-quick-note)
 - [Running the code](#running-the-code)
-  * [Dependencies](#dependencies)
-  * [Data](#data)
-  * [Textual Inversion](#textual-inversion)
-  * [Side note: Textual Inversion Initialization](#side-note--textual-inversion-initialization)
-  * [Reconstruction](#reconstruction)
-  * [Examples](#examples-1)
-  * [Extra tips](#extra-tips)
-  * [Pretrained checkpoints](#pretrained-checkpoints)
+  - [Dependencies](#dependencies)
+  - [Data](#data)
+  - [Textual Inversion](#textual-inversion)
+  - [Side note: Textual Inversion Initialization](#side-note-textual-inversion-initialization)
+  - [Reconstruction](#reconstruction)
+  - [Examples](#examples-1)
+  - [Extra tips](#extra-tips)
+  - [Pretrained checkpoints](#pretrained-checkpoints)
 - [Further Improvements](#further-improvements)
 - [Tips for Researchers](#tips-for-researchers)
 - [Contribution](#contribution)
@@ -75,7 +77,7 @@ pip install ./shencoder
 pip install ./freqencoder
 pip install ./gridencoder
 
-# (Optional) Install nvdiffrast for exporting textured mesh (if use --save_mesh)
+# Install nvdiffrast for exporting textured mesh (if use --save_mesh)
 pip install git+https://github.com/NVlabs/nvdiffrast/
 ```
 

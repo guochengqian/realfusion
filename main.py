@@ -16,8 +16,11 @@ from sd import StableDiffusion, StableDiffusionModel, add_tokens_to_model_from_p
 def main():
 
     # I love lovely_tensors
-    import lovely_tensors
-    lovely_tensors.monkey_patch()
+    try:
+        import lovely_tensors
+        lovely_tensors.monkey_patch()
+    except:
+        pass    # lovely_tensors seems not compatible with interactive debugging using vscode
 
     # Arguments
     opt = Options().parse_args()
