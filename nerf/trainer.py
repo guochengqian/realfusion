@@ -305,6 +305,7 @@ class Trainer(object):
             rays_o = rays_o + torch.randn(B, 1, 3, device=rays_o.device, dtype=rays_o.dtype) * camera_noise
             rays_d = rays_d + torch.randn(B, 1, 3, device=rays_d.device, dtype=rays_d.dtype) * camera_noise
 
+        # TODO: change albedo to lambertian
         # Render from view
         outputs = self.model.render(rays_o, rays_d, staged=False, perturb=True, bg_color=bg_color, 
             ambient_ratio=1.0, shading='albedo', force_all_rays=False, **vars(self.opt))
@@ -374,6 +375,7 @@ class Trainer(object):
                 rays_o = rays_o + torch.randn(B, 1, 3, device=rays_o.device, dtype=rays_o.dtype) * camera_noise
                 rays_d = rays_d + torch.randn(B, 1, 3, device=rays_d.device, dtype=rays_d.dtype) * camera_noise
 
+        # TODO: how about changing albedo to normal.
         # Shading
         if self.global_step < self.opt.albedo_iters:
             shading = 'albedo'

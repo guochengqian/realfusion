@@ -111,7 +111,7 @@ class Options(Tap):
     replace_synthetic_camera_noise: float = 0.02  # std of noise to add to the real camera when used in place of the synthetic cam
     noise_real_camera: float = 0.001  # add noise to the reconstruction step
     # TODO: check this 
-    noise_real_camera_annealing: bool = False  # anneal the noise to zero over the coarse of training
+    noise_real_camera_annealing: bool = True  # anneal the noise to zero over the coarse of training
     
     # Misc
     save_mesh: bool = True  # export an obj mesh with texture
