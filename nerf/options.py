@@ -78,7 +78,7 @@ class Options(Tap):
     # note: at some point HW_real should replace --downsample for blender images
     HW_synthetic: int = 96  # render size for synthetic images
     HW_real: int = 128  # render size for real image, for image_only dataset
-    HW_vis: int = 128  # render size for visualization (i.e. val, test)
+    HW_vis: int = 800  # render size for visualization (i.e. val, test)
     
     # Model
     backbone: Literal['grid'] = 'grid'  # nerf backbone
@@ -92,7 +92,7 @@ class Options(Tap):
     grid_levels_mask_iters: int = 3_000  # the number of iterations for feature grid masking (to disable use 1_000_000)
     optim: Literal['adan', 'adam', 'adamw'] = 'adan'
     fp16: bool = False  # use amp mixed precision training
-    ema_decay: float = -1 # exponential moving average of model weights
+    ema_decay: float =  0.95 # exponential moving average of model weights
 
     # Loss and regularization
     lambda_prior: AnnealedValue = [1.0]  # loss scale for diffusion model
@@ -110,7 +110,7 @@ class Options(Tap):
     replace_synthetic_camera_every: int = 0  # use the real camera in place of the synthetic camera every X steps
     replace_synthetic_camera_noise: float = 0.02  # std of noise to add to the real camera when used in place of the synthetic cam
     noise_real_camera: float = 0.001  # add noise to the reconstruction step
-    # TOOD: check this 
+    # TODO: check this 
     noise_real_camera_annealing: bool = False  # anneal the noise to zero over the coarse of training
     
     # Misc

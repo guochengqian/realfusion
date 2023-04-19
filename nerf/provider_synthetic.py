@@ -28,10 +28,10 @@ def visualize_poses(poses, dirs, size=0.1):
     for pose, dir in zip(poses, dirs):
         # a camera is visualized with 8 line segments.
         pos = pose[:3, 3]
-        a = pos + size * pose[:3, 0] + size * pose[:3, 1] + size * pose[:3, 2]
-        b = pos - size * pose[:3, 0] + size * pose[:3, 1] + size * pose[:3, 2]
-        c = pos - size * pose[:3, 0] - size * pose[:3, 1] + size * pose[:3, 2]
-        d = pos + size * pose[:3, 0] - size * pose[:3, 1] + size * pose[:3, 2]
+        a = pos + size * pose[:3, 0] + size * pose[:3, 1] - size * pose[:3, 2]
+        b = pos - size * pose[:3, 0] + size * pose[:3, 1] - size * pose[:3, 2]
+        c = pos - size * pose[:3, 0] - size * pose[:3, 1] - size * pose[:3, 2]
+        d = pos + size * pose[:3, 0] - size * pose[:3, 1] - size * pose[:3, 2]
 
         segs = np.array([[pos, a], [pos, b], [pos, c], [pos, d], [a, b], [b, c], [c, d], [d, a]])
         segs = trimesh.load_path(segs)
@@ -54,10 +54,10 @@ def get_view_direction(thetas, phis, overhead, front):
     # bottom = 5                            [180-overhead, 180]
     res = torch.zeros(thetas.shape[0], dtype=torch.long)
     # first determine by phis
-    res[(phis < front)] = 0
-    res[(phis >= front) & (phis < np.pi)] = 1
-    res[(phis >= np.pi) & (phis < (np.pi + front))] = 2
-    res[(phis >= (np.pi + front))] = 3
+    res[(phis < front / 2) | (phis >= 2 * np.pi - front / 2)] = 0
+    res[(phis >= front / 2) & (phis < np.pi - front / 2)] = 1
+    res[(phis >= np.pi - front / 2) & (phis < np.pi + front / 2)] = 2
+    res[(phis >= np.pi + front / 2) & (phis < 2 * np.pi - front / 2)] = 3
     # override by thetas
     res[thetas <= overhead] = 4
     res[thetas >= (np.pi - overhead)] = 5
@@ -79,12 +79,11 @@ def rand_poses(
     Return:
         poses: [size, 4, 4]
     '''
-
-    theta_range = np.deg2rad(theta_range)
-    phi_range = np.deg2rad(phi_range)
-    angle_overhead = np.deg2rad(angle_overhead)
-    angle_front = np.deg2rad(angle_front)
-
+    theta_range = np.array(theta_range) / 180 * np.pi
+    phi_range = np.array(phi_range) / 180 * np.pi
+    angle_overhead = angle_overhead / 180 * np.pi
+    angle_front = angle_front / 180 * np.pi
+    
     radius = torch.rand(size, device=device) * (radius_range[1] - radius_range[0]) + radius_range[0]
 
     if random.random() < uniform_sphere_rate:
@@ -102,7 +101,7 @@ def rand_poses(
     else:
         thetas = torch.rand(size, device=device) * (theta_range[1] - theta_range[0]) + theta_range[0]
         phis = torch.rand(size, device=device) * (phi_range[1] - phi_range[0]) + phi_range[0]
-
+        phis[phis < 0] += 2 * np.pi
         centers = torch.stack([
             radius * torch.sin(thetas) * torch.sin(phis),
             radius * torch.cos(thetas),
@@ -117,8 +116,8 @@ def rand_poses(
         targets = targets + torch.randn_like(centers) * 0.2
 
     # lookat
-    forward_vector = safe_normalize(targets - centers)
-    up_vector = torch.FloatTensor([0, -1, 0]).to(device).unsqueeze(0).repeat(size, 1)
+    forward_vector = safe_normalize(centers - targets)
+    up_vector = torch.FloatTensor([0, 1, 0]).to(device).unsqueeze(0).repeat(size, 1)
     right_vector = safe_normalize(torch.cross(forward_vector, up_vector, dim=-1))
 
     if jitter:
@@ -137,6 +136,10 @@ def rand_poses(
     else:
         dirs = None
 
+    # back to degree
+    thetas = thetas / np.pi * 180
+    phis = phis / np.pi * 180
+    
     return poses, dirs
 
 
@@ -146,18 +149,10 @@ def circle_poses(device, radius=1.25, theta=60, phi=0, return_dirs=False, angle_
     angle_overhead = angle_overhead / 180 * np.pi
     angle_front = angle_front / 180 * np.pi
 
-    # theta = np.deg2rad(theta)
-    # phi = np.deg2rad(phi)
-    # angle_overhead = np.deg2rad(angle_overhead)
-    # angle_front = np.deg2rad(angle_front)
-
-    thetas = torch.FloatTensor([theta]).to(device)
-    phis = torch.FloatTensor([phi]).to(device)
-
     centers = torch.stack([
-        radius * torch.sin(thetas) * torch.sin(phis),
-        radius * torch.cos(thetas),
-        radius * torch.sin(thetas) * torch.cos(phis),
+        radius * torch.sin(theta) * torch.sin(phi),
+        radius * torch.cos(theta),
+        radius * torch.sin(theta) * torch.cos(phi),
     ], dim=-1)  # [B, 3]
 
     # lookat
@@ -171,7 +166,7 @@ def circle_poses(device, radius=1.25, theta=60, phi=0, return_dirs=False, angle_
     poses[:, :3, 3] = centers
 
     if return_dirs:
-        dirs = get_view_direction(thetas, phis, angle_overhead, angle_front)
+        dirs = get_view_direction(theta, phi, angle_overhead, angle_front)
     else:
         dirs = None
 

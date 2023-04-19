@@ -104,7 +104,7 @@ class Trainer(object):
         # EMA
         self.ema = None
         if ema_decay is not None:
-            if ema_decay >= 0:
+            if ema_decay > 0:
                 self.ema = ExponentialMovingAverage(self.model.parameters(), decay=ema_decay)
 
         # Loss scaling
