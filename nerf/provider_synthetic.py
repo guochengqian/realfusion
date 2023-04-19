@@ -149,6 +149,9 @@ def circle_poses(device, radius=1.25, theta=60, phi=0, return_dirs=False, angle_
     angle_overhead = angle_overhead / 180 * np.pi
     angle_front = angle_front / 180 * np.pi
 
+    theta = torch.FloatTensor([theta]).to(device)
+    phi = torch.FloatTensor([phi]).to(device)
+    
     centers = torch.stack([
         radius * torch.sin(theta) * torch.sin(phi),
         radius * torch.cos(theta),
@@ -212,9 +215,6 @@ class NeRFDataset:
 
             # random focal
             fov = random.random() * (self.fovy_range[1] - self.fovy_range[0]) + self.fovy_range[0]
-            focal = self.H / (2 * np.tan(np.deg2rad(fov) / 2))
-            intrinsics = np.array([focal, focal, self.cx, self.cy])
-
         else:
             # circle pose
             phi = (index[0] / self.size) * 360
@@ -223,8 +223,9 @@ class NeRFDataset:
 
             # fixed focal
             fov = (self.fovy_range[1] + self.fovy_range[0]) / 2
-            focal = self.H / (2 * np.tan(np.deg2rad(fov) / 2))
-            intrinsics = np.array([focal, focal, self.cx, self.cy])
+
+        focal = self.H / (2 * np.tan(np.deg2rad(fov) / 2))
+        intrinsics = np.array([focal, focal, self.cx, self.cy])
 
         # sample a low-resolution but full image for CLIP
         rays = get_rays(poses, intrinsics, self.H, self.W, -1)

@@ -2,6 +2,7 @@ import random
 import numpy as np
 
 import trimesh
+
 import torch
 import torch.nn.functional as F
 from torch import Tensor
@@ -153,6 +154,9 @@ def circle_poses(device, radius=1.25, theta=60, phi=0, return_dirs=False, angle_
     phi = phi / 180 * np.pi
     angle_overhead = angle_overhead / 180 * np.pi
     angle_front = angle_front / 180 * np.pi
+
+    theta = torch.FloatTensor([theta]).to(device)
+    phi = torch.FloatTensor([phi]).to(device)
 
     centers = torch.stack([
         radius * torch.sin(theta) * torch.sin(phi),
