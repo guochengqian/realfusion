@@ -6,8 +6,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from nerf.provider_image import NeRFDataset as ImageOnlyNeRFDataset
-from nerf.provider_synthetic import NeRFDataset as SyntheticNeRFDataset
+from nerf.provider_image_old import NeRFDataset as ImageOnlyNeRFDataset
+from nerf.provider_synthetic_old import NeRFDataset as SyntheticNeRFDataset
 from nerf.utils import seed_everything, setup_distributed_print
 from nerf.trainer import Trainer
 from nerf.options import Options
