@@ -83,6 +83,8 @@ pip install git+https://github.com/NVlabs/nvdiffrast/
 
 PyTorch and torchvision are not included in `requirements.txt` because that sometimes messes up `conda` installations by trying to re-install PyTorch using `pip`. I assume you've already installed these by yourself.
 
+Alternately, we also provide a single bash file to install everything from scratch including PyTorch for you, please check `install.sh` and run `source install.sh`. 
+
 ### Data
 
 The method takes as input a square image and an object mask. These are compactly represented as an RGBA image. 

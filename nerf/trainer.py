@@ -102,10 +102,10 @@ class Trainer(object):
             self.lr_scheduler = lr_scheduler(self.optimizer)
         
         # EMA
+        self.ema = None
         if ema_decay is not None:
-            self.ema = ExponentialMovingAverage(self.model.parameters(), decay=ema_decay)
-        else:
-            self.ema = None
+            if ema_decay >= 0:
+                self.ema = ExponentialMovingAverage(self.model.parameters(), decay=ema_decay)
 
         # Loss scaling
         self.scaler = torch.cuda.amp.GradScaler(enabled=self.fp16)
@@ -384,6 +384,7 @@ class Trainer(object):
                 shading = 'albedo'
                 ambient_ratio = 1.0
             elif rand > 0.4: 
+            # if rand > 0.8: 
                 shading = 'textureless'
                 ambient_ratio = 0.1
             else: 

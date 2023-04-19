@@ -7,7 +7,7 @@ pip install ./shencoder
 pip install ./freqencoder
 pip install ./gridencoder
 
-pip install git+https://github.com/NVlabs/nvdiffrast# TroubleShooting
+pip install git+https://github.com/NVlabs/nvdiffrast
 
 # Trouble Shooting
 # CUDA error: the provided PTX was compiled with an unsupported toolchain.

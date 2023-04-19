@@ -1,13 +1,15 @@
-export MODEL_NAME="runwayml/stable-diffusion-v1-5"
-export DATA_DIR="data/image" # "path-to-dir-containing-your-image"
-export OUTPUT_DIR="data/text_embedding" # "path-to-desired-output-dir"
+MODEL_NAME="stabilityai/stable-diffusion-2-1-base"
+DATA_DIR=$2 # "path-to-dir-containing-your-image"
+OUTPUT_DIR=$3 # "path-to-desired-output-dir"
+placeholder_token=$4 # _ironman_
+init_token=$5 # _ironman_
 
-python textual_inversion.py \
+CUDA_VISIBLE_DEVICES=$1 python textual-inversion/textual_inversion.py \
   --pretrained_model_name_or_path=$MODEL_NAME \
   --train_data_dir=$DATA_DIR \
   --learnable_property="object" \
-  --placeholder_token="_cat_statue_" \
-  --initializer_token="cat" \
+  --placeholder_token=$placeholder_token \
+  --initializer_token=$init_token \
   --resolution=512 \
   --train_batch_size=1 \
   --gradient_accumulation_steps=4 \

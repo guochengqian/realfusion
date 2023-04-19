@@ -30,9 +30,9 @@ class Options(Tap):
     negative: str = ''  # negative prompt
 
     # Stable diffusion model
-    pretrained_model_name_or_path: str = "runwayml/stable-diffusion-v1-5"  # HF model name
+    pretrained_model_name_or_path: str = "stabilityai/stable-diffusion-2-1-base"  # HF model name
     pretrained_model_image_size: int = 512  # corresponding image size
-    learned_embeds_path: Optional[str] = './examples/natural-images/fish_real_nemo/learned_embeds.bin'  # path to saved embeds dict, usually named learned_embeds.bin
+    learned_embeds_path: Optional[str] = None  # path to saved embeds dict, usually named learned_embeds.bin
 
     # Classifier-free guidance scale for score distillation sampling loss. Large values
     # seem to be necessary for good results, both in DreamFusion and here.
@@ -43,12 +43,12 @@ class Options(Tap):
 
     # Synthetic dataset
     uniform_sphere_rate: float = 0.5  # likelihood of sampling camera location uniformly on the sphere surface area
-    bound: float = 0.75  # assume the scene is bounded in box(-bound, bound)")  # NOTE: Previous bound was 1, but I think 0.75 is better
+    bound: float = 1.0  # assume the scene is bounded in box(-bound, bound)")  # NOTE: Previous bound was 1, but I think 0.75 is better
     dt_gamma: float = 0  # dt_gamma (>=0) for adaptive ray marching. set to 0 to disable, >0 to accelerate rendering (but usually with worse quality)
     min_near: float = 0.1  # minimum near distance for camera
     radius_range: Tuple[float, float] = [1.0, 1.5]  # training camera radius range
     radius_rot: Optional[float] = 1.8  # None  # circle radius for vis
-    fovy_range: Tuple[float, float] = [40, 70]  # training camera fovy range
+    fovy_range: Tuple[float, float] = [40, 80]  # training camera fovy range
     dir_text: bool = True  # direction-encode the text prompt, by appending front/side/back/overhead view
     suppress_face: Optional[str] = None  # text for negative prompt for back view of image
     angle_overhead: float = 30  # [0, angle_overhead] is the overhead region
@@ -63,9 +63,9 @@ class Options(Tap):
     lr_warmup: Optional[bool] = None  # whether to use a learning rate warmup
     lr: float = 1e-3  # initial learning rate (only if using lr_warmup)
     min_lr: float = 1e-6  # minimal learning rate (only if using lr_warmup)
-    warm_iters: int = 2000  # warmup iters
+    # warm_iters: int = 2000  # warmup iters
     cuda_ray: bool = True  # use CUDA raymarching instead of pytorch
-    max_steps: int = 512  # max num steps sampled per ray (only valid when using --cuda_ray)
+    max_steps: int = 1024  # max num steps sampled per ray (only valid when using --cuda_ray)
     num_steps: int = 64  # num steps sampled per ray (only valid when not using --cuda_ray)
     upsample_steps: int = 32  # num steps up-sampled per ray (only valid when not using --cuda_ray)
     update_extra_interval: int = 16  # iter interval to update extra status (only valid when using --cuda_ray)
@@ -92,7 +92,7 @@ class Options(Tap):
     grid_levels_mask_iters: int = 3_000  # the number of iterations for feature grid masking (to disable use 1_000_000)
     optim: Literal['adan', 'adam', 'adamw'] = 'adamw'
     fp16: bool = False  # use amp mixed precision training
-    ema_decay: float = 0.95  # exponential moving average of model weights
+    ema_decay: float = -1 # exponential moving average of model weights
 
     # Loss and regularization
     lambda_prior: AnnealedValue = [1.0]  # loss scale for diffusion model
@@ -107,13 +107,14 @@ class Options(Tap):
     # Reconstruction
     real_iters: int = 0  # start reconstructions iterations after X iterations of prior-only optimization
     real_every: int = 1  # do reconstruction every X iterations to save on compute
-    replace_synthetic_camera_every: int = 10  # use the real camera in place of the synthetic camera every X steps
+    replace_synthetic_camera_every: int = 0  # use the real camera in place of the synthetic camera every X steps
     replace_synthetic_camera_noise: float = 0.02  # std of noise to add to the real camera when used in place of the synthetic cam
     noise_real_camera: float = 0.001  # add noise to the reconstruction step
-    noise_real_camera_annealing: bool = True  # anneal the noise to zero over the coarse of training
+    # TOOD: check this 
+    noise_real_camera_annealing: bool = False  # anneal the noise to zero over the coarse of training
     
     # Misc
-    save_mesh: bool = False  # export an obj mesh with texture
+    save_mesh: bool = True  # export an obj mesh with texture
     save_test_name: str = 'df_test'  # identifier for saving test visualizations
     test_on_real_data: bool = False  # whether to do the test on real data or not
     wandb: bool = False  # Weights & Biases
