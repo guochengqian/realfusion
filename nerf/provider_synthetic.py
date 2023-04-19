@@ -141,11 +141,15 @@ def rand_poses(
 
 
 def circle_poses(device, radius=1.25, theta=60, phi=0, return_dirs=False, angle_overhead=30, angle_front=60):
+    theta = theta / 180 * np.pi
+    phi = phi / 180 * np.pi
+    angle_overhead = angle_overhead / 180 * np.pi
+    angle_front = angle_front / 180 * np.pi
 
-    theta = np.deg2rad(theta)
-    phi = np.deg2rad(phi)
-    angle_overhead = np.deg2rad(angle_overhead)
-    angle_front = np.deg2rad(angle_front)
+    # theta = np.deg2rad(theta)
+    # phi = np.deg2rad(phi)
+    # angle_overhead = np.deg2rad(angle_overhead)
+    # angle_front = np.deg2rad(angle_front)
 
     thetas = torch.FloatTensor([theta]).to(device)
     phis = torch.FloatTensor([phi]).to(device)
@@ -157,8 +161,8 @@ def circle_poses(device, radius=1.25, theta=60, phi=0, return_dirs=False, angle_
     ], dim=-1)  # [B, 3]
 
     # lookat
-    forward_vector = - safe_normalize(centers)
-    up_vector = torch.FloatTensor([0, -1, 0]).to(device).unsqueeze(0)
+    forward_vector = safe_normalize(centers)
+    up_vector = torch.FloatTensor([0, 1, 0]).to(device).unsqueeze(0)
     right_vector = safe_normalize(torch.cross(forward_vector, up_vector, dim=-1))
     up_vector = safe_normalize(torch.cross(right_vector, forward_vector, dim=-1))
 

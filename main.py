@@ -16,11 +16,11 @@ from sd import StableDiffusion, StableDiffusionModel, add_tokens_to_model_from_p
 def main():
 
     # I love lovely_tensors
-    try:
-        import lovely_tensors
-        lovely_tensors.monkey_patch()
-    except:
-        pass    # lovely_tensors seems not compatible with interactive debugging using vscode
+    # try:
+    #     import lovely_tensors
+    #     lovely_tensors.monkey_patch()
+    # except:
+    #     pass    # lovely_tensors seems not compatible with interactive debugging using vscode
 
     # Arguments
     opt = Options().parse_args()
@@ -151,7 +151,7 @@ def main():
         
         # Setup
         trainer.prepare_for_reconstruction(real_train_loader, real_train_full_image_loader, real_val_loader, real_test_loader)
-        trainer.check_prompt()
+        # trainer.check_prompt()
 
         # Train
         trainer.train(train_loader, val_loader, vis_loader, max_epoch)

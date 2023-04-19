@@ -88,9 +88,9 @@ class Options(Tap):
     blob_radius: float = 0.2  # control the radius for the gaussian density blob
     grid_levels: int = 16  # the number of levels in the feature grid
     grid_resolution: int = 2048  #  maximum resolution of the feature grid
-    grid_levels_mask: int = 8  # the number of levels in the feature grid to mask (to disable use 0)
+    grid_levels_mask: int = 0  # the number of levels in the feature grid to mask (to disable use 0)
     grid_levels_mask_iters: int = 3_000  # the number of iterations for feature grid masking (to disable use 1_000_000)
-    optim: Literal['adan', 'adam', 'adamw'] = 'adamw'
+    optim: Literal['adan', 'adam', 'adamw'] = 'adan'
     fp16: bool = False  # use amp mixed precision training
     ema_decay: float = -1 # exponential moving average of model weights
 
