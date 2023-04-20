@@ -63,7 +63,7 @@ def main():
         opt, device=device, type='train', H=opt.HW_real, W=opt.HW_real, size=1
     ).dataloader()
     real_train_full_image_loader = ImageOnlyNeRFDataset(
-        opt, device=device, type='test', H=opt.HW_real, W=opt.HW_real, size=1, force_test_mode=True
+        opt, device=device, type='train', H=opt.HW_real, W=opt.HW_real, size=1, force_test_mode=True
     ).dataloader()
     real_val_loader = ImageOnlyNeRFDataset(
         opt, device=device, type='val', H=opt.HW_real, W=opt.HW_real, size=8, load_image=False
