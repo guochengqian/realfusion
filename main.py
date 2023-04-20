@@ -46,7 +46,7 @@ def main():
 
     # Create loaders for synthetic data
     train_loader = SyntheticNeRFDataset(
-        opt, device=device, type='test', H=opt.HW_synthetic, W=opt.HW_synthetic, size=100
+        opt, device=device, type='train', H=opt.HW_synthetic, W=opt.HW_synthetic, size=100
     ).dataloader()
     val_loader = SyntheticNeRFDataset(
         opt, device=device, type='val', H=opt.HW_vis, W=opt.HW_vis, size=5
@@ -60,7 +60,7 @@ def main():
 
     # Create loaders for real data
     real_train_loader = ImageOnlyNeRFDataset(
-        opt, device=device, type='test', H=opt.HW_real, W=opt.HW_real, size=1
+        opt, device=device, type='train', H=opt.HW_real, W=opt.HW_real, size=1
     ).dataloader()
     real_train_full_image_loader = ImageOnlyNeRFDataset(
         opt, device=device, type='test', H=opt.HW_real, W=opt.HW_real, size=1, force_test_mode=True
@@ -100,7 +100,7 @@ def main():
     else:
 
         # Stable diffusion guidance
-        stable_diffusion_model = StableDiffusionModel.from_pretrained(opt.pretrained_model_name_or_path)
+        stable_diffusion_model = StableDiffusionModel.from_pretrained(opt.pretrained_model_name_or_path, torch_dtype=torch.float16 if opt.fp16 else torch.float32)
         if opt.learned_embeds_path is not None:  # add textual inversion tokens to model
             add_tokens_to_model_from_path(
                 opt.learned_embeds_path, stable_diffusion_model.text_encoder, stable_diffusion_model.tokenizer

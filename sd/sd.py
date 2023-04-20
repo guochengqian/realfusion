@@ -1,12 +1,29 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.cuda.amp import custom_bwd, custom_fwd
 from diffusers.models.autoencoder_kl import AutoencoderKL
 from diffusers.models.unet_2d_condition import UNet2DConditionModel
 from diffusers.schedulers.scheduling_pndm import PNDMScheduler
 from transformers import CLIPTextModel, CLIPTokenizer
 
 from sd.wrapper import StableDiffusionModel
+
+
+class SpecifyGradient(torch.autograd.Function):
+    @staticmethod
+    @custom_fwd
+    def forward(ctx, input_tensor, gt_grad):
+        ctx.save_for_backward(gt_grad)
+        # we return a dummy value 1, which will be scaled by amp's scaler so we get the scale in backward.
+        return torch.ones([1], device=input_tensor.device, dtype=input_tensor.dtype)
+
+    @staticmethod
+    @custom_bwd
+    def backward(ctx, grad_scale):
+        gt_grad, = ctx.saved_tensors
+        gt_grad = gt_grad * grad_scale
+        return gt_grad, None
 
 
 class StableDiffusion(nn.Module):
@@ -70,29 +87,33 @@ class StableDiffusion(nn.Module):
 
             # Forward
             noise_pred = self.unet(latent_model_input, t, encoder_hidden_states=emb).sample
+        # TODO: move out
+        # CFG
+        noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
+        noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
 
-            # CFG
-            noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
-            noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
+        # Weight function. Can also use `w = self.alphas[t] ** 0.5 * (1 - self.alphas[t])` or maybe `w = 1`
+        w = (1 - self.alphas[t])
+        grad = lambda_grad * w * (noise_pred - noise)
+    
+        # Mask
+        if mask_grad is not None:
+            mask_grad = F.interpolate(mask_grad, (64, 64), mode='bilinear', align_corners=False)
+            grad = grad * mask_grad
 
-            # Weight function. Can also use `w = self.alphas[t] ** 0.5 * (1 - self.alphas[t])` or maybe `w = 1`
-            w = (1 - self.alphas[t])
-            grad = lambda_grad * w * (noise_pred - noise)
-        
-            # Mask
-            if mask_grad is not None:
-                mask_grad = F.interpolate(mask_grad, (64, 64), mode='bilinear', align_corners=False)
-                grad = grad * mask_grad
+        # (Not sure if necessary) clip grad for stable training? Maybe `grad = grad.clamp(-10, 10)` ?
+        grad = torch.nan_to_num(grad)
 
-            # (Not sure if necessary) clip grad for stable training? Maybe `grad = grad.clamp(-10, 10)` ?
-            grad = torch.nan_to_num(grad)
+        # since we omitted an item in grad, we need to use the custom function to specify the gradient
+        loss = SpecifyGradient.apply(latents, grad)
+        return loss
+        # # Manually backward, since we omitted an item in grad and cannot simply autodiff.
+        # latents.backward(gradient=grad, retain_graph=True)
 
-        # Manually backward, since we omitted an item in grad and cannot simply autodiff.
-        latents.backward(gradient=grad, retain_graph=True)
-
-        # Return something to represent the loss
-        pseudo_loss = grad.abs().mean().detach()
-        return pseudo_loss
+        # # Return something to represent the loss
+        # pseudo_loss = grad.abs().mean().detach()
+        # TODO: detach loss???
+        # return pseudo_loss
 
     @torch.no_grad()
     def produce_latents(self, text_embeddings, height=512, width=512, num_inference_steps=50, 

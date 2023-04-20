@@ -413,15 +413,25 @@ class NeRFRenderer(nn.Module):
                 rays_alive = rays_alive[rays_alive >= 0]
 
                 step += n_step
+        # # mix background color (only during training, not testing)
+        # if self.bg_radius > 0 and self.training:
+            
+        #     # use the bg model to calculate bg_color
+        #     bg_color = self.background(rays_d) # [N, 3]
+
+        # elif bg_color is None:
+        #     bg_color = 1
+
 
         # mix background color (only during training, not testing)
-        if self.bg_radius > 0 and self.training:
-            
-            # use the bg model to calculate bg_color
-            bg_color = self.background(rays_d) # [N, 3]
-
-        elif bg_color is None:
-            bg_color = 1
+        # TODO: here always bgnet??
+        if bg_color is None:
+            if self.bg_radius > 0:
+            # if self.bg_radius > 0 and self.training:
+                # use the bg model to calculate bg_color
+                bg_color = self.background(rays_d) # [N, 3]
+            else:
+                bg_color = 1
 
         image = image + (1 - weights_sum).unsqueeze(-1) * bg_color
         image = image.view(*prefix, self.C)

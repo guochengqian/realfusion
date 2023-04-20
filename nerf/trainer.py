@@ -293,6 +293,7 @@ class Trainer(object):
         data = self.get_real_data()
         rays_o: Tensor = data['rays_o'] # [B, N, 3]
         rays_d: Tensor = data['rays_d'] # [B, N, 3]
+        H, W = data['H'], data['W']
         gt_rgb: Tensor = data['images'][..., :3]  # [B, N, 3]
         gt_opacity: Tensor = data['images'][..., 3:]  # [B, N, 1] (alpha)
         B, N = rays_o.shape[:2]
@@ -309,8 +310,8 @@ class Trainer(object):
         # Render from view
         outputs = self.model.render(rays_o, rays_d, staged=False, perturb=True, bg_color=bg_color, 
             ambient_ratio=1.0, shading='albedo', force_all_rays=False, **vars(self.opt))
-        pred_rgb: torch.Tensor = outputs['image']  # [B, N, 3]
-        pred_opacity: torch.Tensor = outputs['weights_sum'].reshape(B, N, 1)  # [B, N, 1]
+        pred_rgb: torch.Tensor = outputs['image'].reshape(-1, H, W, 3)  # [B, H, W, 3]
+        pred_opacity: torch.Tensor = outputs['weights_sum'].reshape(-1, H, W, 1) # [B, N, 1]
         
         # Losses
         loss_real_dict = {}
@@ -375,7 +376,6 @@ class Trainer(object):
                 rays_o = rays_o + torch.randn(B, 1, 3, device=rays_o.device, dtype=rays_o.dtype) * camera_noise
                 rays_d = rays_d + torch.randn(B, 1, 3, device=rays_d.device, dtype=rays_d.dtype) * camera_noise
 
-        # TODO: how about changing albedo to normal.
         # Shading
         if self.global_step < self.opt.albedo_iters:
             shading = 'albedo'
@@ -630,18 +630,18 @@ class Trainer(object):
             # Loss
             self.optimizer.zero_grad()
             with torch.cuda.amp.autocast(enabled=self.fp16):
-                
-                # Train step: synthetic data
-                if self.use_synthetic_data > 0:
-                    loss_synthetic = self.train_step_synthetic_data(data)
-                else:
-                    loss_synthetic = 0
-            
                 # Train step: real data
                 if self.use_real_data and self.global_step >= self.opt.real_iters and self.global_step % self.opt.real_every == 0:
                     loss_real, loss_real_dict = self.train_step_real_data()
                 else:
-                    loss_real, loss_real_dict = 0, {}
+                    loss_real, loss_real_dict = 0, {}              
+                # Train step: synthetic data
+
+                if self.use_synthetic_data > 0:
+                    loss_synthetic = self.train_step_synthetic_data(data)
+                else:
+                    loss_synthetic = 0
+
             
             # Backward
             loss = loss_synthetic + loss_real

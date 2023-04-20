@@ -204,7 +204,9 @@ class NeRFDataset:
         radius_rot = self.opt.radius_rot if self.opt.radius_rot else (self.radius_range[1] * 1.2)
         self.circle_radius = radius if radius else radius_rot
 
-        self.num_rays = self.opt.num_rays if self.training else -1
+        # TODO: all rays
+        # self.num_rays = self.opt.num_rays if self.training else -1
+        self.num_rays = -1
             
         ### Real images for reconstruction ###
         if load_image:
@@ -242,15 +244,16 @@ class NeRFDataset:
             'H': self.H,
             'W': self.W,
             'rays_o': rays['rays_o'],
-            'rays_d': rays['rays_d'],
+            'rays_d': rays['rays_d'], 
+            'images': self.image,
             # 'dir': dirs,  # no dirs for image (at the moment)
         }
 
-        if self.image is not None:
-            data['image_full_size'] = image = self.image
-            if self.training:
-                image = torch.gather(image.view(B, -1, self.C), 1, torch.stack(self.C * [rays['inds']], -1))  # [B, N, C], C=4
-            data['images'] = image
+        # if self.image is not None:
+        #     data['image_full_size'] = image = self.image
+        #     # if self.training:
+        #     #     image = torch.gather(image.view(B, -1, self.C), 1, torch.stack(self.C * [rays['inds']], -1))  # [B, N, C], C=4
+        #     data['images'] = image
 
         return data
 
