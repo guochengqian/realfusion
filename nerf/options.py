@@ -43,12 +43,12 @@ class Options(Tap):
 
     # Synthetic dataset
     uniform_sphere_rate: float = 0.5  # likelihood of sampling camera location uniformly on the sphere surface area
-    bound: float = 1.0  # assume the scene is bounded in box(-bound, bound)")  # NOTE: Previous bound was 1, but I think 0.75 is better
+    bound: float = 0.75  # assume the scene is bounded in box(-bound, bound)")  # NOTE: Previous bound was 1, but I think 0.75 is better
     dt_gamma: float = 0  # dt_gamma (>=0) for adaptive ray marching. set to 0 to disable, >0 to accelerate rendering (but usually with worse quality)
     min_near: float = 0.1  # minimum near distance for camera
     radius_range: Tuple[float, float] = [1.0, 1.5]  # training camera radius range
     radius_rot: Optional[float] = 1.8  # None  # circle radius for vis
-    fovy_range: Tuple[float, float] = [40, 80]  # training camera fovy range
+    fovy_range: Tuple[float, float] = [40, 70]  # training camera fovy range
     dir_text: bool = True  # direction-encode the text prompt, by appending front/side/back/overhead view
     suppress_face: Optional[str] = None  # text for negative prompt for back view of image
     angle_overhead: float = 30  # [0, angle_overhead] is the overhead region
@@ -88,9 +88,9 @@ class Options(Tap):
     blob_radius: float = 0.2  # control the radius for the gaussian density blob
     grid_levels: int = 16  # the number of levels in the feature grid
     grid_resolution: int = 2048  #  maximum resolution of the feature grid
-    grid_levels_mask: int = 0  # the number of levels in the feature grid to mask (to disable use 0)
+    grid_levels_mask: int = 8  # the number of levels in the feature grid to mask (to disable use 0)
     grid_levels_mask_iters: int = 3_000  # the number of iterations for feature grid masking (to disable use 1_000_000)
-    optim: Literal['adan', 'adam', 'adamw'] = 'adan'
+    optim: Literal['adan', 'adam', 'adamw'] = 'adamw'
     fp16: bool = False  # use amp mixed precision training
     ema_decay: float =  0.95 # exponential moving average of model weights
 
@@ -110,8 +110,7 @@ class Options(Tap):
     replace_synthetic_camera_every: int = 0  # use the real camera in place of the synthetic camera every X steps
     replace_synthetic_camera_noise: float = 0.02  # std of noise to add to the real camera when used in place of the synthetic cam
     noise_real_camera: float = 0.001  # add noise to the reconstruction step
-    # TODO: check this 
-    noise_real_camera_annealing: bool = False  # anneal the noise to zero over the coarse of training
+    noise_real_camera_annealing: bool = True  # anneal the noise to zero over the coarse of training
     
     # Misc
     save_mesh: bool = True  # export an obj mesh with texture
