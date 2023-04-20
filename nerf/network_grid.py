@@ -38,7 +38,7 @@ class NeRFNetwork(NeRFRenderer):
                  num_layers=3,
                  hidden_dim=64,
                  num_layers_bg=2,
-                 hidden_dim_bg=64,
+                 hidden_dim_bg=32,  # TODO: 64?
                  level_dim=2,
                  ):
         
@@ -47,15 +47,16 @@ class NeRFNetwork(NeRFRenderer):
         self.num_layers = num_layers
         self.hidden_dim = hidden_dim
         self.level_dim = level_dim
-
-        self.encoder, self.in_dim = get_encoder(
-            'tiledgrid', 
-            input_dim=3,
-            level_dim=self.level_dim,
-            log2_hashmap_size=16,
-            num_levels=opt.grid_levels,
-            desired_resolution=opt.grid_resolution * self.bound,
-        )
+        # TODO:
+        # self.encoder, self.in_dim = get_encoder(
+        #     'tiledgrid', 
+        #     input_dim=3,
+        #     level_dim=self.level_dim,
+        #     log2_hashmap_size=16,
+        #     num_levels=opt.grid_levels,
+        #     desired_resolution=opt.grid_resolution * self.bound,
+        # )
+        self.encoder, self.in_dim = get_encoder('hashgrid', input_dim=3, log2_hashmap_size=19, desired_resolution=2048 * self.bound, interpolation='smoothstep')
 
         self.sigma_net = MLP(self.in_dim, self.C + 1, hidden_dim, num_layers, bias=True)
 
