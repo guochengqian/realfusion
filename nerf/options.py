@@ -5,10 +5,10 @@ from typing import Literal, Optional, List, Tuple
 from tap import Tap
 
 
-# An AnnealedValue is a helper type for a value that may be annealed over the course of 
-# training. It can either be a single value fixed for all of training, or a list of 
-# [start_value, end_value] which is annealed linearly over all training iterations, or a 
-# list of [start_value, end_value, end_iters, fn_name] which reaches its end_value at 
+# An AnnealedValue is a helper type for a value that may be annealed over the course of
+# training. It can either be a single value fixed for all of training, or a list of
+# [start_value, end_value] which is annealed linearly over all training iterations, or a
+# list of [start_value, end_value, end_iters, fn_name] which reaches its end_value at
 # end_iters and may use either linear or log annealing.
 AnnealedValue = List[float]
 
@@ -30,7 +30,7 @@ class Options(Tap):
     negative: str = ''  # negative prompt
 
     # Stable diffusion model
-    pretrained_model_name_or_path: str = "stabilityai/stable-diffusion-2-1-base"  # HF model name
+    pretrained_model_name_or_path: str = "runwayml/stable-diffusion-v1-5"  # HF model name
     pretrained_model_image_size: int = 512  # corresponding image size
     learned_embeds_path: Optional[str] = None  # path to saved embeds dict, usually named learned_embeds.bin
 
@@ -55,7 +55,7 @@ class Options(Tap):
     angle_front: float = 60  # [0, angle_front] is the front region, [180, 180+angle_front] the back region, otherwise the side region.
     pose_angle: float = 75  # angle for visualization and reconstruction, note that it's 90-X degrees, not X degrees
     jitter_pose: bool = False  # add jitters to the randomly sampled camera poses
-    
+
     # Training
     ckpt: str = 'latest'
     eval_interval: int = 5  # evaluate on the valid set every interval epochs
@@ -79,7 +79,7 @@ class Options(Tap):
     HW_synthetic: int = 96  # render size for synthetic images
     HW_real: int = 128  # render size for real image, for image_only dataset
     HW_vis: int = 800  # render size for visualization (i.e. val, test)
-    
+
     # Model
     backbone: Literal['grid'] = 'grid'  # nerf backbone
     bg_radius: float = 1.4  # use a background model at sphere (note: radius does not matter as long as > 0)
@@ -111,7 +111,7 @@ class Options(Tap):
     replace_synthetic_camera_noise: float = 0.02  # std of noise to add to the real camera when used in place of the synthetic cam
     noise_real_camera: float = 0.001  # add noise to the reconstruction step
     noise_real_camera_annealing: bool = True  # anneal the noise to zero over the coarse of training
-    
+
     # Misc
     save_mesh: bool = True  # export an obj mesh with texture
     save_test_name: str = 'df_test'  # identifier for saving test visualizations
@@ -130,7 +130,7 @@ class Options(Tap):
             self.fp16 = self.albedo
             self.dir_text = True
             self.backbone = 'vanilla'
-        
+
         # Defaults
         if self.albedo:
             self.albedo_iters = self.iters
@@ -138,23 +138,23 @@ class Options(Tap):
             self.lr_warmup = False  # (self.backbone == 'vanilla') when we add the vanilla option later on
 
         # Checks
-        if (self.lambda_prior == 0) and (self.real_iters > 0 or self.real_every > 1): 
+        if (self.lambda_prior == 0) and (self.real_iters > 0 or self.real_every > 1):
             raise ValueError('What are you doing?')
-        
+
         # Debug
         if self.debug:
             # self.run_name = "debug"
             self.wandb = False
             self.workspace = None
-        
+
         # Set up automatic token replacement for prompt
         if '<token>' in self.text or '<token>' in self.negative:
             if self.learned_embeds_path is None:
-                raise ValueError('--learned_embeds_path must be specified when using <token>') 
+                raise ValueError('--learned_embeds_path must be specified when using <token>')
             import torch
             tmp = list(torch.load(self.learned_embeds_path, map_location='cpu').keys())
             if len(tmp) != 1:
-                raise ValueError('Something is wrong with the dict passed in for --learned_embeds_path') 
+                raise ValueError('Something is wrong with the dict passed in for --learned_embeds_path')
             token = tmp[0]
             self.text = self.text.replace('<token>', token)
             self.negative = self.negative.replace('<token>', token)
